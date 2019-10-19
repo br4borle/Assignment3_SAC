@@ -1,0 +1,235 @@
+####Working Code 2#####
+
+dir <- "Z:/Geog 418/Lab 3/V2"
+setwd(dir)
+
+
+tracts <- readOGR(dsn = ".", layer = "Vic_Census")
+
+
+census.16 <- read.csv("CensusTractData.csv")
+
+crd.data <- merge(tracts, census.16, by = "GUID") ##Merges files together
+
+Var1 <- "PopD"
+
+Var1
+### Assigns the column of interst - change if another parameer is of interest
+
+Var2 <- "Population Density"
+
+Var2
+### Important for labeling - Change to match Var1
+
+###Subset
+
+crd.data <-crd.data[,Var1] ##Subsetting the dataFrame [all rows in column Var1]
+
+summary(crd.data)
+
+crd.data
+crd.data@data
+
+ ### Cleans NA Values from Variable, ## @data tells it to use the data
+
+
+crd.data <- crd.data[!is.na(crd.data@data[,Var1]),]
+
+########################
+
+class(crd.data)
+summary(crd.data)
+########################
+
+map_var1 <- tm_shape(crd.data) + 
+  tm_polygons(col = Var1, 
+              title = Var2, 
+              style = "jenks", 
+              palette = "viridis", n = 6)
+##Col - Colour By Medincome
+##Title - Polygon Title
+##Style - Seperation Classification
+
+map_var1
+
+png (paste(Var2, ".png",sep = ""))
+  
+map_var1
+dev.off()
+########################
+
+
+########################
+crd.nb <- poly2nb(crd.data)
+crd.net <- nb2lines(crd.nb,coords=coordinates(crd.data))
+
+
+Queens <- tm_shape(crd.data) + tm_borders(col='lightgrey') + 
+  tm_shape(crd.net) + tm_lines(col='red',) + tm_style("white", title = "Queen's Method Neighbour Analysis") +
+  tm_format("World")  ### Queens
+Queens
+
+png ("QueensV2.png")
+Queens
+dev.off()
+
+crd.nb2 <- poly2nb(crd.data, queen = FALSE)
+crd.net2 <- nb2lines(crd.nb2,coords=coordinates(crd.data))
+
+Rooks <- tm_shape(crd.data) + tm_borders(col='lightgrey') + 
+  tm_shape(crd.net2) + tm_lines(col='blue') + tm_style("white", title = "Rook's Method Neighbour Analysis") +
+  tm_format("World")  
+Rooks ### Rooks
+
+png ("RooksV2.png")
+Rooks
+dev.off()
+
+###Mapped Together###
+tm_shape(crd.data) + tm_borders(col='lightgrey') + 
+  tm_shape(crd.net) + tm_lines(col='red', lwd = 2) +
+  tm_shape(crd.net2) + tm_lines(col='blue', lwd = 2, alpha = 0.5)
+########################
+
+crd.lw <- nb2listw(crd.nb2, zero.policy = TRUE, style = "W") ###Sents the weighting algorithm - crb.nd = queen case
+print.listw(crd.lw, zero.policy = TRUE)
+##Needto change crd.nb to crd.nb2 if you want to use rooks case
+########################
+
+crd.data$V1LagMeans = lag.listw(crd.lw, crd.data@data[,Var1], zero.policy = TRUE)
+### how an individual polygon compares to the mean of its neighbours#
+
+summary(crd.data)
+
+Var2LaggedMeans <- paste(Var2, "/nLagMeans", sep = "")
+
+map_LagMean <- tm_shape(crd.data) + 
+  tm_polygons(col = "V1LagMeans", 
+              title = Var2LaggedMeans, 
+              style = "jenks", 
+              palette = "viridis", n = 6) 
+
+map_LagMean
+
+png(paste(Var2,"_LagMean.png",sep = ""))
+map_LagMean
+dev.off()
+
+summary(crd.data)
+
+########################
+mi <- moran.test(crd.data@data[,Var1], crd.lw, zero.policy = TRUE)
+mi ### Formula for global morans I
+
+
+moran.range <- function(lw) {
+  wmat <- listw2mat(lw)
+  return(range(eigen((wmat + t(wmat))/2)$values))
+}
+moran.range(crd.lw)
+### Full range of Moran I values
+
+mI <- mi$estimate[[1]] ##Grabs the I value
+mI <- round(mI, digits = 5)
+eI <- mi$estimate[[2]] ### Grabs Expected I
+eI <- round(eI, digits = 5)
+var <- mi$estimate[[3]] ### Grabs Varience
+var <- round(var, digits = 5)
+
+z <- (mI-eI)/sqrt(var)
+z <- round(z, digits = 5)
+
+data.for.table1 = data.frame(mI, eI, var, z)
+
+
+#Make table 1
+table1 <- tableGrob(data.for.table1) #make a table "Graphical Object" (GrOb) 
+t1Caption <- textGrob(paste("Table 1:",Var2,"Global Moran's I Outputs"), gp = gpar(fontsize = 09))
+padding <- unit(5, "mm")
+
+table1 <- gtable_add_rows(table1, 
+                          heights = grobHeight(t1Caption) + padding, 
+                          pos = 0)
+
+table1 <- gtable_add_grob(table1,
+                          t1Caption, t = 1, l = 2, r = ncol(data.for.table1) + 1)
+
+
+grid.arrange(table1, newpage = TRUE)
+
+#Printing a table (You can use the same setup for printing other types of objects (see ?png))
+png(paste(Var2,"_Output_GlobalMoransI.png", sep ="")) #Create an object to print the table to
+grid.arrange(table1, newpage = TRUE)
+dev.off() #Print table
+
+########################  
+
+lisa.test <- localmoran(crd.data@data[,Var1], crd.lw)
+### Local Morans I 
+###crd.lw - weight matrix
+
+crd.data$Ii <- lisa.test[,1]
+crd.data$E.Ii<- lisa.test[,2]
+crd.data$Var.Ii<- lisa.test[,3]
+crd.data$Z.Ii<- lisa.test[,4]
+crd.data$P<- lisa.test[,5]
+###Needs to be put in to a variable and attach to CRD data so that we may map
+########################
+
+LISAI <- paste(Var2, "Local Moran's I Values")
+
+map_LISA <- tm_shape(crd.data) + 
+  tm_polygons(col = "Ii", 
+              title = LISAI, 
+              style = "jenks", 
+              palette = "viridis", n = 6) 
+###Col can be changes to map Z scores for significance
+
+
+map_LISA
+
+png(paste(Var2,"_map_LISA_Ii.png",sep=""))
+map_LISA
+dev.off()
+
+LISAZ <- paste(Var2, "Local Moran's I Z-Scores")
+
+map_LISAZ <- tm_shape(crd.data) + 
+  tm_polygons(col = "Z.Ii", 
+              title = LISAZ, 
+              style = "jenks", 
+              palette = "viridis", n = 6) 
+###Col can be changes to map Z scores for significance
+
+
+map_LISAZ
+
+png(paste(Var2,"_map_LISA_Ii_ZScore.png",sep=""))
+map_LISAZ
+dev.off()
+
+LISAP <- paste(Var2, "Local Moran's I P-Values")
+
+map_LISAP <- tm_shape(crd.data) + 
+  tm_polygons(col = "P", 
+              title = LISAP, 
+              style = "jenks", 
+              palette = "viridis", n = 6) 
+###Col can be changes to map Z scores for significance
+
+
+map_LISAP
+
+png(paste(Var2,"_map_LISA_Ii_PVal.png",sep=""))
+map_LISAP
+dev.off()
+
+########################
+PoltLM <- paste("Spatially Lagged ",Var2,sep = "")
+
+png(paste(Var2,"_Plot_LocalM.png", sep=""))
+moran.plot(crd.data@data[,Var1], crd.lw, zero.policy=NULL, spChk=NULL, labels=NULL, xlab= Var2, 
+           ylab=PoltLM, quiet=NULL)
+dev.off()
+###NW and SE Quadrats - Negeative SAC
+###SW and NE Quadrats - Positive SAC

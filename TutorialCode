@@ -93,7 +93,7 @@ map_var1 <- tm_shape(crd.data) +
   tm_polygons(col = Var1, 
               title = Var2, 
               style = "jenks", 
-              palette = "viridis", n = 6)
+              palette = "BrBG", n = 9)
 ##Col - Colour By Medincome
 ##Title - Polygon Title
 ##Style - Seperation Classification
@@ -155,7 +155,7 @@ map_LagMean <- tm_shape(crd.data) +
   tm_polygons(col = "V1LagMeans", 
               title = Var2LaggedMeans, 
               style = "jenks", 
-              palette = "viridis", n = 6) 
+              palette = "BrBG", n = 9) 
 
 map_LagMean
 
@@ -224,13 +224,13 @@ crd.data$P<- lisa.test[,5]
 ###Needs to be put in to a variable and attach to CRD data so that we may map
 ########################
 
-LISAI <- paste(Var2, "Local Moran's I Values")
+LISAI <- paste(Var1, "Local Moran's I Values")
 
 map_LISA <- tm_shape(crd.data) + 
   tm_polygons(col = "Ii", 
               title = LISAI, 
               style = "jenks", 
-              palette = "viridis", n = 6) 
+              palette = "BrBG", n = 9) 
 ###Col can be changes to map Z scores for significance
 
 
@@ -240,13 +240,13 @@ png(paste(Var2,"_map_LISA_Ii.png",sep=""))
 map_LISA
 dev.off()
 
-LISAZ <- paste(Var2, "Local Moran's I Z-Scores")
+LISAZ <- paste(Var1, "Local Moran's I Z-Scores")
 
 map_LISAZ <- tm_shape(crd.data) + 
   tm_polygons(col = "Z.Ii", 
               title = LISAZ, 
               style = "jenks", 
-              palette = "viridis", n = 6) 
+              palette = "BrBG", n = 9) 
 ###Col can be changes to map Z scores for significance
 
 
@@ -256,13 +256,13 @@ png(paste(Var2,"_map_LISA_Ii_ZScore.png",sep=""))
 map_LISAZ
 dev.off()
 
-LISAP <- paste(Var2, "Local Moran's I P-Values")
+LISAP <- paste(Var1, "Local Moran's I P-Values")
 
 map_LISAP <- tm_shape(crd.data) + 
   tm_polygons(col = "P", 
               title = LISAP, 
               style = "jenks", 
-              palette = "viridis", n = 6) 
+              palette = "BrBG", n = 9) 
 ###Col can be changes to map Z scores for significance
 
 

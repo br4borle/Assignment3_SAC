@@ -1,3 +1,51 @@
+### GEOG 418/518 ###
+tmaptools::palette_explorer() #Tool for selecting pallettes
+
+### LAB 3 - SPATIAL AUTOCORRELATION ###
+
+install.packages("tidyverse")
+install.packages("gridExtra")
+install.packages("maps")
+install.packages("bcmaps")
+install.packages("tmap")
+install.packages("fBasics")
+install.packages('bcmapsdata', repos='https://bcgov.github.io/drat/')
+install.packages("lemon")
+install.packages("data.table")
+
+install.packages("plyr")
+install.packages("dplyr")
+install.packages("spdep")
+install.packages("GISTools")
+install.packages("raster")
+install.packages("maptools")
+install.packages("rgdal")
+install.packages("tmap")
+install.packages("BAMMtools")
+install.packages("shinyjs")
+
+library(plyr)
+library(dplyr)
+library(spdep)
+library(GISTools)
+library(raster)
+library(maptools)
+library(rgdal)
+library(tmap)
+library(BAMMtools)
+
+library("tidyverse")
+library("lubridate")
+library("grid")
+library("gridExtra")
+library("gtable")
+library("maps")
+library("bcmaps")
+library("tmap")
+library("fBasics")
+library("bcmapsdata")
+library("data.table")
+
 ####Working Code 2#####
 
 dir <- "Z:/Geog 418/Lab 3/V2"

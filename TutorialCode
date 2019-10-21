@@ -59,12 +59,12 @@ census.16 <- read.csv("CensusTractData.csv")
 
 crd.data <- merge(tracts, census.16, by = "GUID") ##Merges files together
 
-Var1 <- "PopD"
+Var1 <- "MdInc"
 
 Var1
 ### Assigns the column of interst - change if another parameer is of interest
 
-Var2 <- "Population Density"
+Var2 <- "Median Income"
 
 Var2
 ### Important for labeling - Change to match Var1

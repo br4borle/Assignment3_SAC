@@ -139,7 +139,7 @@ tm_shape(crd.data) + tm_borders(col='lightgrey') +
   tm_shape(crd.net2) + tm_lines(col='blue', lwd = 2, alpha = 0.5)
 ########################
 
-crd.lw <- nb2listw(crd.nb2, zero.policy = TRUE, style = "W") ###Sents the weighting algorithm - crb.nd = queen case
+crd.lw <- nb2listw(crd.nb, zero.policy = TRUE, style = "W") ###Sents the weighting algorithm - crb.nd = queen case
 print.listw(crd.lw, zero.policy = TRUE)
 ##Needto change crd.nb to crd.nb2 if you want to use rooks case
 ########################
